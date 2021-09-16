@@ -73,6 +73,7 @@ def retrieve_image(image):
             print("Takes", time.time()-before_time,"Seconds")
     else:
         print("not proc")
+        
 async def publish_loop():
     
     global image_retrieve, image_readed
