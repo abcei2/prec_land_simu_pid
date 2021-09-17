@@ -74,7 +74,7 @@ sudo make altinstall
 Installing python packages.  
 ```bash
 sudo python3.5 -m pip install -U pip
-sudo python3.5 -m pip install tqdm pymavlink Pillow asyncio numpy PyYaml opencv-contrib-python
+sudo python3.5 -m pip install tqdm pymavlink dronekit Pillow asyncio numpy PyYaml opencv-contrib-python
 ```
 pygazebo main repository works just until python2.7, wil3 github user mase some changes to work until 3.5 python version   
 ```bash
@@ -96,8 +96,8 @@ sim_vehicle.py -v ArduCopter -f gazebo-iris
 ```
 ### Excecute landing_script.py (precision algorithm) 
 ```bash
-cd prec_land_simu/  
-python3.5 landing_script.py
+cd prec_land_simu_pid/  
+python3.5 landing_script_pid.py
 ```
 ### Open QGroundControl.
 If not automatic connection, create one udp connection localhost:14551.  
@@ -111,3 +111,4 @@ If not automatic connection, create one udp connection localhost:14551.
 **QGC Installation:** https://docs.qgroundcontrol.com/master/en/getting_started/download_and_install.html  
 **pygazebo DOC:** https://pygazebo.readthedocs.io/en/latest/  
 **pygazebo until python 2.7** https://pypi.org/project/pygazebo/  
+**AWESOME LANDING PID!!!** https://github.com/nikv96/AutonomousPrecisionLanding 
