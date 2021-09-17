@@ -36,7 +36,7 @@ def pixels_per_meter(fov, res, alt):
 
 
 def land(vehicle, target, attitude, location):
-    if(vehicle.location.global_relative_frame.alt <= 1.3):
+    if(vehicle.location.global_relative_frame.alt <= 0.5):
         vehicle.mode = VehicleMode('LAND')
     if(target is not None):
         move_to_target(vehicle, target, attitude, location)
@@ -62,7 +62,7 @@ def move_to_target(vehicle, target, attitude, location):
     print("x = " + str(x), "vx = " + str(vx), "y = " + str(y),
           "vy = " + str(vy), "distance:", math.sqrt(x**2 + y**2))
     vz = 0
-    if(math.sqrt(x**2 + y**2) < 2):
+    if(math.sqrt(x**2 + y**2) < 0.1):
         vz = 0.25
     else:
         vz = 0

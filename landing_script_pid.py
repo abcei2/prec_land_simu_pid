@@ -6,12 +6,10 @@ import cv2
 from PIL import Image
 import numpy as np
 
-from dronekit import connect, LocationGlobal
-# Dronekit imports
-from dronekit_sitl import SITL
+from dronekit import connect
 
 # Helper Libraries Imports
-import pid_utils.search_image as search_image
+import pid_utils.search_image_aruco as search_image
 import pid_utils.control as control
 import multiprocessing
 
@@ -23,7 +21,7 @@ import queue as Queue
 global image_retrieve, image_readed, parent_conn_im, child_conn_im, imageQueue, vehicleQueue, frame_count, vehicle, proccesing_hz, proccesing_timer
 image_retrieve = []
 image_readed = True
-proccesing_hz = 2.0
+proccesing_hz = 10.0
 proccesing_timer = time.time()
 
 
@@ -36,6 +34,9 @@ connection_string = 'udp:127.0.0.1:14551'
 
 print("Connecting to vehicle on: %s" % connection_string)
 vehicle = connect(connection_string, wait_ready=True, baud=57600)
+
+
+
 
 
 
@@ -65,11 +66,11 @@ def retrieve_image(image):
             
             img = imageQueue.get()
             location, attitude = vehicleQueue.get()
-            rend_Image = search_image.add_target_highlights(img, results[2])
             
 
             control.land(vehicle, results[1], attitude, location)
             time.sleep(0.1)
+            proccesing_hz=1/((time.time()-before_time)*1.2)
             print("Takes", time.time()-before_time,"Seconds")
     else:
         print("not proc")
