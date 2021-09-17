@@ -62,7 +62,7 @@ def move_to_target(vehicle, target, attitude, location):
     print("x = " + str(x), "vx = " + str(vx), "y = " + str(y),
           "vy = " + str(vy), "distance:", math.sqrt(x**2 + y**2))
     vz = 0
-    if(math.sqrt(x**2 + y**2) < 0.1):
+    if(math.sqrt(x**2 + y**2) < 0.2):
         vz = 0.25
     else:
         vz = 0

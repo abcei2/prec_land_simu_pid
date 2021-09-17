@@ -9,7 +9,8 @@ import numpy as np
 from dronekit import connect
 
 # Helper Libraries Imports
-import pid_utils.search_image_aruco as search_image
+import pid_utils.search_image_aruco as search_image_aruco
+import pid_utils.search_image as search_image
 import pid_utils.control as control
 import multiprocessing
 
@@ -35,13 +36,16 @@ connection_string = 'udp:127.0.0.1:14551'
 print("Connecting to vehicle on: %s" % connection_string)
 vehicle = connect(connection_string, wait_ready=True, baud=57600)
 
-
+with_aruco=True
+if with_aruco:
+    priorized_tag = 0
+    priorized_tag_counter = { }
 
 
 
 
 def retrieve_image(image):
-    global image_retrieve, image_readed, parent_conn_im, child_conn_im, imageQueue, vehicleQueue, frame_count, vehicle, proccesing_hz, proccesing_timer
+    global priorized_tag,priorized_tag_counter, image_retrieve, image_readed, parent_conn_im, child_conn_im, imageQueue, vehicleQueue, frame_count, vehicle, proccesing_hz, proccesing_timer
             
     if time.time()>proccesing_timer+1/proccesing_hz:
         
@@ -56,11 +60,21 @@ def retrieve_image(image):
             imageQueue.put(frame)
             vehicleQueue.put((location,attitude))
 
-            img = multiprocessing.Process(name="img",target=search_image.analyze_frame, args = (child_conn_im, frame, location, attitude))
+            if with_aruco:
+                img = multiprocessing.Process(name="img",target=search_image_aruco.analyze_frame, args = (child_conn_im, frame, location, attitude,priorized_tag,priorized_tag_counter))
+            else:
+                img = multiprocessing.Process(name="img",target=search_image.analyze_frame, args = (child_conn_im, frame, location, attitude))
             img.daemon = True
             img.start()
 
             results = parent_conn_im.recv()
+            if with_aruco:
+                try:
+                    priorized_tag_counter=results[3]
+                    priorized_tag=results[4]
+                except IndexError:
+                    print("some index error")
+                
             
             frame_count += 1
             
@@ -70,7 +84,7 @@ def retrieve_image(image):
 
             control.land(vehicle, results[1], attitude, location)
             time.sleep(0.1)
-            proccesing_hz=1/((time.time()-before_time)*1.2)
+            proccesing_hz=1/((time.time()-before_time)*1.5)
             print("Takes", time.time()-before_time,"Seconds")
     else:
         print("not proc")
