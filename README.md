@@ -76,6 +76,10 @@ Installing python packages.
 sudo python3.5 -m pip install -U pip
 sudo python3.5 -m pip install tqdm pymavlink dronekit Pillow asyncio numpy PyYaml opencv-contrib-python
 ```
+And without opencv using apriltag
+```bash
+sudo python3.5 -m pip install tqdm pymavlink dronekit Pillow asyncio numpy PyYaml apriltag
+```
 pygazebo main repository works just until python2.7, wil3 github user mase some changes to work until 3.5 python version   
 ```bash
 git clone https://github.com/wil3/py3gazebo
