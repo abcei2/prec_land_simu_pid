@@ -1,2 +1,12 @@
 .pyc
 __pycache__
+logs/
+.BIN
+.DAT
+terrain/
+mav.parm
+.bin
+.tlog
+eeprom.bin
+mav.tlog.raw
+mav.tlog

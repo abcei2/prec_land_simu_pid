@@ -12,29 +12,20 @@ import os
 import math
 import time
 from copy import copy
-import yaml
 
-#Opencv Imports
-from cv2 import aruco
-import cv2
+import apriltag
 import numpy as np
 
 
 from aruco_utils import rgb2gray
 
-#--------------- ARUCO TAG  INIT SECTION -------------#
-aruco_dict = aruco.getPredefinedDictionary( aruco.DICT_6X6_1000 )
+#--------------- APRIL TAG  INIT SECTION -------------#
+# define the AprilTags detector options and then detect the AprilTags
+# in the input image
+print("[INFO] detecting AprilTags...")
+options = apriltag.DetectorOptions(families="tag25h9")
+detector = apriltag.Detector(options)
 
-arucoParams = aruco.DetectorParameters_create()
-
-with open('calibration.yaml') as f:
-    print("LOADED")
-    loadeddict = yaml.load(f)
-
-mtx = loadeddict.get('camera_matrix')
-dist = loadeddict.get('dist_coeff')
-mtx = np.array(mtx)
-dist = np.array(dist)
 
 #Global Variables
 hres = 640
@@ -49,41 +40,25 @@ def analyze_frame(child_conn, img, location, attitude, priorized_tag, priorized_
 	start = current_milli_time()
 	im_gray = rgb2gray(img).astype(np.uint8)
 	h,  w = im_gray.shape[:2]
-	corners, ids, rejectedImgPoints = aruco.detectMarkers(im_gray, aruco_dict, parameters=arucoParams)
+	results = detector.detect(im_gray)
 
-	img_aruco = img.copy()
-	if len(corners)==0:
+	if len(results)==0:
 		stop = current_milli_time()
 		child_conn.send((stop-start, None, None,priorized_tag_counter, priorized_tag))
-		return
 	else:
-		img_aruco = aruco.drawDetectedMarkers(img, corners, ids, (0,255,0))
-		try:
-			if ids == None:
-				img_aruco = image.copy()
-				return
-		except:
-			pass
+	
 		corners_dict={}
-		for corner, id1 in zip(corners,ids):
-			markerLength = 0
-			if id1[0]==20: 
-				markerLength=14.6
-			if id1[0]==21: 
-				markerLength=29.2    
-			if id1[0]==22: 
-				markerLength=58.5
-			if id1[0]==23:                         
-				markerLength=117.8 
-
-			corners_dict[str(id1[0])]={
-				"corner":corner[0],
-				"markerLength":markerLength
+		for r in results:
+		
+		
+			corners_dict[str(r.tag_id)]={
+				"corner":r.corners,
 			}
 					
 		smaller_tag_id = min(corners_dict.keys())
 		if smaller_tag_id not in priorized_tag_counter.keys():
 			priorized_tag_counter[smaller_tag_id]=0
+			
 		if priorized_tag_counter[smaller_tag_id] <10:
 			priorized_tag_counter[smaller_tag_id]=priorized_tag_counter[smaller_tag_id]+1
 
@@ -119,7 +94,7 @@ def analyze_frame(child_conn, img, location, attitude, priorized_tag, priorized_
 		stop = current_milli_time()
 		child_conn.send((stop-start, center, target, priorized_tag_counter, priorized_tag))
 
-	print("Detected :",len(corners), "targets")
+	print("Detected :",len(results), "targets")
 
 
 

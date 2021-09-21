@@ -60,9 +60,15 @@ def move_to_target(vehicle, target, attitude, location):
     vy = y_pid.get_pid(y, 0.1)
 
     print("x = " + str(x), "vx = " + str(vx), "y = " + str(y),
-          "vy = " + str(vy), "distance:", math.sqrt(x**2 + y**2))
+          "vy = " + str(vy), "distance:", math.sqrt(x**2 + y**2),"alt", alt)
     vz = 0
-    if(math.sqrt(x**2 + y**2) < 0.2):
+    if alt < 3.5:
+        min_distance=0.05
+    else:
+        min_distance=0.2
+
+
+    if(math.sqrt(x**2 + y**2) < min_distance):
         vz = 0.25
     else:
         vz = 0

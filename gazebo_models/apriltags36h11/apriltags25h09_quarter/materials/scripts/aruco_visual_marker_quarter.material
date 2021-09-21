@@ -1,0 +1,13 @@
+material Apriltags25h09Quarter/Marker
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture marker4.png
+			}
+		}
+	}
+}

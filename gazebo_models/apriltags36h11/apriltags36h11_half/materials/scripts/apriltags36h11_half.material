@@ -1,0 +1,13 @@
+material Apriltags36h11Half/Marker
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture marker1.png
+			}
+		}
+	}
+}

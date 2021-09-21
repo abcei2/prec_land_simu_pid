@@ -2,15 +2,14 @@
 
 import asyncio
 import pygazebo
-import cv2
 from PIL import Image
 import numpy as np
 
 from dronekit import connect
 
 # Helper Libraries Imports
-import pid_utils.search_image_aruco as search_image_aruco
-import pid_utils.search_image as search_image
+import pid_utils.search_image_april_tag as search_image_april_tag
+
 import pid_utils.control as control
 import multiprocessing
 
@@ -37,9 +36,8 @@ print("Connecting to vehicle on: %s" % connection_string)
 vehicle = connect(connection_string, wait_ready=True, baud=57600)
 
 with_aruco=True #False uses haarcascade
-if with_aruco:
-    priorized_tag = 0
-    priorized_tag_counter = { }
+priorized_tag = 0
+priorized_tag_counter = { }
 
 
 
@@ -60,10 +58,8 @@ def retrieve_image(image):
             imageQueue.put(frame)
             vehicleQueue.put((location,attitude))
 
-            if with_aruco:
-                img = multiprocessing.Process(name="img",target=search_image_aruco.analyze_frame, args = (child_conn_im, frame, location, attitude,priorized_tag,priorized_tag_counter))
-            else:
-                img = multiprocessing.Process(name="img",target=search_image.analyze_frame, args = (child_conn_im, frame, location, attitude))
+           
+            img = multiprocessing.Process(name="img",target=search_image_april_tag.analyze_frame, args = (child_conn_im, frame, location, attitude,priorized_tag,priorized_tag_counter))
             img.daemon = True
             img.start()
 
@@ -85,7 +81,7 @@ def retrieve_image(image):
             control.land(vehicle, results[1], attitude, location)
             time.sleep(0.1)
             proccesing_hz=1/((time.time()-before_time)*1.5)
-            print("Takes", time.time()-before_time,"Seconds")
+            print("Takes", time.time()-before_time,"Seconds", priorized_tag, priorized_tag_counter)
     else:
         print("not proc")
         

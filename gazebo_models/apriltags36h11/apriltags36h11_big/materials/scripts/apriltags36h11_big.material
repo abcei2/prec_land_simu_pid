@@ -1,0 +1,13 @@
+material Apriltags36h11Big/Marker
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture marker0.png
+			}
+		}
+	}
+}
