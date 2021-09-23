@@ -27,7 +27,7 @@ aruco_dict = aruco.getPredefinedDictionary( aruco.DICT_6X6_1000 )
 
 arucoParams = aruco.DetectorParameters_create()
 
-with open('calibration.yaml') as f:
+with open('aruco_utils/calibration.yaml') as f:
     print("LOADED")
     loadeddict = yaml.load(f)
 
@@ -39,8 +39,8 @@ dist = np.array(dist)
 #Global Variables
 hres = 640
 vres = 480
-vfov = 48.7
-hfov = 49.7
+vfov = 60
+hfov = 80
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
@@ -84,12 +84,12 @@ def analyze_frame(child_conn, img, location, attitude, priorized_tag, priorized_
 		smaller_tag_id = min(corners_dict.keys())
 		if smaller_tag_id not in priorized_tag_counter.keys():
 			priorized_tag_counter[smaller_tag_id]=0
-		if priorized_tag_counter[smaller_tag_id] <10:
+		if priorized_tag_counter[smaller_tag_id] <5:
 			priorized_tag_counter[smaller_tag_id]=priorized_tag_counter[smaller_tag_id]+1
 
 
 		min_tag_detected=min(priorized_tag_counter.keys())
-		if (priorized_tag_counter[min_tag_detected] >=10 and priorized_tag >min_tag_detected) or priorized_tag==0:
+		if (priorized_tag_counter[min_tag_detected] >=5 and priorized_tag >min_tag_detected) or priorized_tag==0:
 			priorized_tag=min_tag_detected
 		
 		
