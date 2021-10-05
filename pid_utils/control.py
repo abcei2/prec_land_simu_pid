@@ -12,9 +12,7 @@ from pymavlink import mavutil
 
 # Common Library Imports
 from pid_utils.flight_assist import send_velocity
-from pid_utils.position_vector import PositionVector
 import pid_utils.pid as pid
-
 # Python Imports
 import math
 import time
@@ -24,6 +22,7 @@ import argparse
 x_pid = pid.pid(0.2, 0.005, 0.1, 50)
 y_pid = pid.pid(0.2, 0.005, 0.1, 50)
 z_pid = pid.pid(0.05, 0.005, 0.1, 50)
+z_pid_rtl = pid.pid(0.05, 0.005, 0.1, 50)
 hfov = 80
 hres = 640
 vfov = 60
@@ -38,13 +37,16 @@ def pixels_per_meter(fov, res, alt):
 
 def land(vehicle, target, attitude, location,forensic_message):
     
+    if vehicle.mode ==  VehicleMode('LAND'):
+        return
+
     if vehicle.mode ==  VehicleMode('RTL'):
         vehicle.mode = VehicleMode('GUIDED')
-
         
+    print(vehicle.location.global_relative_frame.alt)        
     if(vehicle.location.global_relative_frame.alt <= 0.3):
+
         vehicle.mode = VehicleMode('LAND')
-        
     if(target is not None):
         vx, vy, vz, dist_error = move_to_target(vehicle, target, attitude, location)
         forensic_message["control_stats"]["vx"]=vx
@@ -60,24 +62,24 @@ def land(vehicle, target, attitude, location,forensic_message):
         forensic_message["control_stats"]["vy"]=vy
         forensic_message["control_stats"]["vz"]=vz
         send_velocity(vehicle, vy, vx, vz, 1)
-    
+        
+
 
 
 def move_to_target(vehicle, target, attitude, location):
     x, y = target
+    z = vehicle.location.global_relative_frame.alt
 
-    alt = vehicle.location.global_relative_frame.alt
-    px_meter_x = pixels_per_meter(hfov, hres, alt)
-    px_meter_y = pixels_per_meter(vfov, vres, alt)
-
+    px_meter_x = pixels_per_meter(hfov, hres, z)
+    px_meter_y = pixels_per_meter(vfov, vres, z)
     x *= px_meter_x
     y *= px_meter_y
-    z = alt
-    vx = x_pid.get_pid(x, 0.1)
-    vy = y_pid.get_pid(y, 0.1)
-
     dist_error = math.sqrt(x**2 + y**2+z**2)
-    vz = z_pid.get_pid(dist_error, 0.1)
+
+    dt = 0.1
+    vx = x_pid.get_pid(x, dt)
+    vy = y_pid.get_pid(y, dt)
+    vz = z_pid.get_pid(dist_error, dt)
     #print("alt = " + str(alt), "vz = " + str(vz), "distance:", dist_error,"alt", alt)
           
     send_velocity(vehicle, vy, vx, vz, 1)
